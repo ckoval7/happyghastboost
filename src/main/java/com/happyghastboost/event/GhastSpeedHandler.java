@@ -1,0 +1,87 @@
+package com.happyghastboost.event;
+
+import com.happyghastboost.HappyGhastBoost;
+import com.happyghastboost.config.StaminaConfig;
+import com.happyghastboost.data.GhastStaminaData;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.animal.HappyGhast;
+import net.minecraft.world.entity.player.Player;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.event.tick.EntityTickEvent;
+
+public class GhastSpeedHandler {
+    private static final float DEFAULT_GHAST_SPEED = 0.05f;
+    private float lastLoggedStamina = -1;
+
+    @SubscribeEvent
+    public void onEntityTick(EntityTickEvent.Pre event) {
+        Entity entity = event.getEntity();
+
+        // Only process on server side
+        if (entity.level().isClientSide()) {
+            return;
+        }
+
+        // Only process Happy Ghasts
+        if (!(entity instanceof HappyGhast ghast)) {
+            return;
+        }
+
+        // Check if ghast has a player riding it
+        boolean hasRider = !ghast.getPassengers().isEmpty() &&
+                ghast.getPassengers().get(0) instanceof Player;
+
+        if (hasRider) {
+            // Initialize stamina if not present
+            if (!GhastStaminaData.hasStamina(ghast)) {
+                GhastStaminaData.initializeStamina(ghast);
+            }
+
+            // Calculate and apply speed based on stamina
+            float stamina = GhastStaminaData.getStamina(ghast);
+            float speed = calculateSpeed(stamina);
+            applySpeed(ghast, speed);
+        } else {
+            // Reset to default speed when no rider
+            applySpeed(ghast, DEFAULT_GHAST_SPEED);
+        }
+    }
+
+    /**
+     * Calculate speed using exponential curve (Option C - Inverted Decay)
+     */
+    private float calculateSpeed(float stamina) {
+        float normalizedStamina = stamina / 100.0f;
+        float curveStrength = StaminaConfig.CURVE_STRENGTH.get().floatValue();
+
+        // Exponential curve: stays high, drops rapidly at low stamina
+        float curve = 1.0f - (float) Math.exp(-curveStrength * normalizedStamina);
+
+        float baseSpeed = StaminaConfig.BASE_SPEED.get().floatValue();
+        float maxSpeed = StaminaConfig.MAX_SPEED.get().floatValue();
+
+        float speed = baseSpeed + curve * (maxSpeed - baseSpeed);
+
+        // Log only when crossing a 20-point threshold
+        int staminaBucket = ((int)stamina / 20) * 20;
+        int lastBucket = ((int)lastLoggedStamina / 20) * 20;
+        if (staminaBucket != lastBucket && stamina > 0) {
+            HappyGhastBoost.LOGGER.debug("Stamina: {} -> Speed: {} ({}x)",
+                    stamina, String.format("%.3f", speed), String.format("%.2f", speed / baseSpeed));
+            lastLoggedStamina = stamina;
+        }
+
+        return speed;
+    }
+
+    /**
+     * Apply speed to ghast's flying movement attribute
+     */
+    private void applySpeed(HappyGhast ghast, float speed) {
+        var flyingSpeedAttr = ghast.getAttribute(Attributes.FLYING_SPEED);
+        if (flyingSpeedAttr != null && flyingSpeedAttr.getBaseValue() != speed) {
+            flyingSpeedAttr.setBaseValue(speed);
+        }
+    }
+}

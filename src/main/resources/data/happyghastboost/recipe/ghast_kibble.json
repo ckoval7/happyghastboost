@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "RSR",
+    "SZS",
+    "RSR"
+  ],
+  "key": {
+    "R": "minecraft:rotten_flesh",
+    "S": "minecraft:sugar",
+    "Z": "minecraft:snowball"
+  },
+  "result": {
+    "id": "happyghastboost:ghast_kibble",
+    "count": 4
+  }
+}
