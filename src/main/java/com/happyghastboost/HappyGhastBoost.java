@@ -8,11 +8,13 @@ import com.happyghastboost.event.GhastSpeedHandler;
 import com.happyghastboost.event.StaminaDecayHandler;
 import com.happyghastboost.item.ModItems;
 import com.happyghastboost.network.StaminaSyncPayload;
+import net.minecraft.world.item.CreativeModeTabs;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import org.slf4j.Logger;
@@ -38,6 +40,9 @@ public class HappyGhastBoost {
         // Register network packets
         modEventBus.addListener(this::registerPayloads);
 
+        // Register creative tab additions
+        modEventBus.addListener(this::addCreative);
+
         // Register event handlers
         NeoForge.EVENT_BUS.register(new StaminaDecayHandler());
         NeoForge.EVENT_BUS.register(new GhastSpeedHandler());
@@ -55,5 +60,13 @@ public class HappyGhastBoost {
                 StaminaSyncPayload::handleClient
         );
         LOGGER.info("Registered stamina sync packet");
+    }
+
+    private void addCreative(BuildCreativeModeTabContentsEvent event) {
+        // Add Ghast Kibble to the Food and Drinks tab
+        if (event.getTabKey() == CreativeModeTabs.FOOD_AND_DRINKS) {
+            event.accept(ModItems.GHAST_KIBBLE);
+            LOGGER.debug("Added Ghast Kibble to Food and Drinks creative tab");
+        }
     }
 }
