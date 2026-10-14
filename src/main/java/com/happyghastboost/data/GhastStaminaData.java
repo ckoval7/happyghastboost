@@ -1,6 +1,7 @@
 package com.happyghastboost.data;
 
 import com.happyghastboost.HappyGhastBoost;
+import com.happyghastboost.common.StaminaMath;
 import com.happyghastboost.config.StaminaConfig;
 import com.mojang.serialization.Codec;
 import net.minecraft.world.entity.Entity;
@@ -58,7 +59,7 @@ public class GhastStaminaData {
      * Set stamina on entity, clamped to valid range
      */
     public static void setStamina(Entity entity, float stamina) {
-        float clamped = Math.max(0, Math.min(stamina, StaminaConfig.MAX_STAMINA.get().floatValue()));
+        float clamped = StaminaMath.clamp(stamina, StaminaConfig.MAX_STAMINA.get().floatValue());
         entity.setData(STAMINA, clamped);
     }
 

@@ -1,5 +1,6 @@
 package com.happyghastboost.event;
 
+import com.happyghastboost.common.StaminaMath;
 import com.happyghastboost.config.StaminaConfig;
 import com.happyghastboost.data.GhastStaminaData;
 import net.minecraft.world.entity.Entity;
@@ -46,20 +47,14 @@ public class GhastSpeedHandler {
         }
     }
 
-    /**
-     * Calculate speed using exponential curve (Option C - Inverted Decay)
-     */
     private float calculateSpeed(float stamina) {
-        float normalizedStamina = stamina / StaminaConfig.MAX_STAMINA.get();
-        float curveStrength = StaminaConfig.CURVE_STRENGTH.get().floatValue();
-
-        // Exponential curve: stays high, drops rapidly at low stamina
-        float curve = 1.0f - (float) Math.exp(-curveStrength * normalizedStamina);
-
-        float baseSpeed = StaminaConfig.BASE_SPEED.get().floatValue();
-        float maxSpeed = StaminaConfig.MAX_SPEED.get().floatValue();
-
-        return baseSpeed + curve * (maxSpeed - baseSpeed);
+        return StaminaMath.speedFor(
+                stamina,
+                StaminaConfig.MAX_STAMINA.get(),
+                StaminaConfig.BASE_SPEED.get().floatValue(),
+                StaminaConfig.MAX_SPEED.get().floatValue(),
+                StaminaConfig.CURVE_STRENGTH.get().floatValue()
+        );
     }
 
     /**
