@@ -54,11 +54,8 @@ public class HappyGhastBoost {
 
     private void registerPayloads(RegisterPayloadHandlersEvent event) {
         PayloadRegistrar registrar = event.registrar("1");
-        registrar.playToClient(
-                StaminaSyncPayload.TYPE,
-                StaminaSyncPayload.STREAM_CODEC,
-                StaminaSyncPayload::handleClient
-        );
+        // Client handler is registered in ClientSetup so no client classes load on a dedicated server
+        registrar.playToClient(StaminaSyncPayload.TYPE, StaminaSyncPayload.STREAM_CODEC);
         LOGGER.info("Registered stamina sync packet");
     }
 

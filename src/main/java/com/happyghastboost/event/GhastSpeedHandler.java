@@ -1,6 +1,5 @@
 package com.happyghastboost.event;
 
-import com.happyghastboost.HappyGhastBoost;
 import com.happyghastboost.config.StaminaConfig;
 import com.happyghastboost.data.GhastStaminaData;
 import net.minecraft.world.entity.Entity;
@@ -12,7 +11,6 @@ import net.neoforged.neoforge.event.tick.EntityTickEvent;
 
 public class GhastSpeedHandler {
     private static final float DEFAULT_GHAST_SPEED = 0.05f;
-    private float lastLoggedStamina = -1;
 
     @SubscribeEvent
     public void onEntityTick(EntityTickEvent.Pre event) {
@@ -52,7 +50,7 @@ public class GhastSpeedHandler {
      * Calculate speed using exponential curve (Option C - Inverted Decay)
      */
     private float calculateSpeed(float stamina) {
-        float normalizedStamina = stamina / 100.0f;
+        float normalizedStamina = stamina / StaminaConfig.MAX_STAMINA.get();
         float curveStrength = StaminaConfig.CURVE_STRENGTH.get().floatValue();
 
         // Exponential curve: stays high, drops rapidly at low stamina
@@ -61,18 +59,7 @@ public class GhastSpeedHandler {
         float baseSpeed = StaminaConfig.BASE_SPEED.get().floatValue();
         float maxSpeed = StaminaConfig.MAX_SPEED.get().floatValue();
 
-        float speed = baseSpeed + curve * (maxSpeed - baseSpeed);
-
-        // Log only when crossing a 20-point threshold
-        int staminaBucket = ((int)stamina / 20) * 20;
-        int lastBucket = ((int)lastLoggedStamina / 20) * 20;
-        if (staminaBucket != lastBucket && stamina > 0) {
-            HappyGhastBoost.LOGGER.debug("Stamina: {} -> Speed: {} ({}x)",
-                    stamina, String.format("%.3f", speed), String.format("%.2f", speed / baseSpeed));
-            lastLoggedStamina = stamina;
-        }
-
-        return speed;
+        return baseSpeed + curve * (maxSpeed - baseSpeed);
     }
 
     /**

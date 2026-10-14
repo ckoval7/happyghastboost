@@ -29,11 +29,11 @@ public class StaminaConfig {
                 .defineInRange("maxStamina", 100, 1, 1000);
 
         INITIAL_STAMINA = BUILDER
-                .comment("Initial stamina for new Happy Ghasts (default: 0)")
-                .defineInRange("initialStamina", 0, 0, 100);
+                .comment("Initial stamina for new Happy Ghasts, capped at maxStamina (default: 0)")
+                .defineInRange("initialStamina", 0, 0, 1000);
 
         FOOD_RESTORE_AMOUNT = BUILDER
-                .comment("Stamina points restored per Glowstone Dust (default: 20)")
+                .comment("Stamina points restored per Ghast Kibble (default: 20)")
                 .defineInRange("foodRestoreAmount", 20, 1, 100);
 
         BUILDER.pop();
@@ -45,11 +45,11 @@ public class StaminaConfig {
                 .defineInRange("baseSpeed", 0.05, 0.01, 1.0);
 
         MAX_SPEED = BUILDER
-                .comment("Maximum flying speed at 100 stamina (default: 0.125)")
+                .comment("Flying speed at full stamina (default: 0.125)")
                 .defineInRange("maxSpeed", 0.125, 0.01, 1.0);
 
         CURVE_STRENGTH = BUILDER
-                .comment("Exponential curve strength for speed calculation (default: 4.0)")
+                .comment("Exponential curve strength for speed calculation (default: 2.0)")
                 .comment("Higher values = speed stays high longer, then drops sharply")
                 .defineInRange("curveStrength", 2.0, 1.0, 10.0);
 
